@@ -47,7 +47,6 @@ BUSYBOX_CONFIG := minimal full
 $(BUSYBOX_CONFIG):
 	@echo -e ${CL_PFX}"prepare config for busybox $@ profile"${CL_RST}
 	@cd $(BB_PATH) && make clean
-	@cd $(BB_PATH) && git clean -f -- ./include-$@/
 	@sed 's/arm-eabi-/$(BB_CROSS_COMPILE)/g' $(BB_PATH)/.config-$@ > $(BB_PATH)/.config
 	cd $(BB_PATH) && make prepare
 	@mkdir -p $(BB_PATH)/include-$@
@@ -213,7 +212,7 @@ LOCAL_MODULE_STEM := busybox
 LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES := libclearsilverregex libc libcutils libm libuclibcrpc
 LOCAL_MODULE_CLASS := UTILITY_EXECUTABLES
-LOCAL_MODULE_PATH := $(PRODUCT_OUT)/utilities
+LOCAL_MODULE_PATH := $(PRODUCT_OUT)/istweak
 LOCAL_UNSTRIPPED_PATH := $(PRODUCT_OUT)/symbols/utilities
 $(LOCAL_MODULE): busybox_prepare
 include $(BUILD_EXECUTABLE)
