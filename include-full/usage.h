@@ -266,6 +266,7 @@
 	"-[" IF_FEATURE_TAR_CREATE("c") "xt" \
 	IF_FEATURE_SEAMLESS_Z("Z") \
 	IF_FEATURE_SEAMLESS_GZ("z") \
+	IF_FEATURE_SEAMLESS_XZ("J") \
 	IF_FEATURE_SEAMLESS_BZ2("j") \
 	IF_FEATURE_SEAMLESS_LZMA("a") \
 	IF_FEATURE_TAR_CREATE("h") \
@@ -292,6 +293,9 @@
 	) \
 	IF_FEATURE_SEAMLESS_GZ( \
      "\n	z	(De)compress using gzip" \
+	) \
+	IF_FEATURE_SEAMLESS_XZ( \
+     "\n	J	(De)compress using xz" \
 	) \
 	IF_FEATURE_SEAMLESS_BZ2( \
      "\n	j	(De)compress using bzip2" \
@@ -1021,6 +1025,8 @@
      "\n	-n	Don't dereference symlinks - treat like normal file" \
      "\n	-b	Make a backup of the target (if exists) before link operation" \
      "\n	-S suf	Use suffix instead of ~ when making backup files" \
+     "\n	-T	2nd arg must be a DIR" \
+     "\n	-v	Verbose" \
 
 #define ln_example_usage \
        "$ ln -s BusyBox /tmp/ls\n" \
@@ -1149,6 +1155,17 @@
 
 #define sha512sum_full_usage "\n\n" \
        "Print" IF_FEATURE_MD5_SHA1_SUM_CHECK(" or check") " SHA512 checksums" \
+	IF_FEATURE_MD5_SHA1_SUM_CHECK( "\n" \
+     "\n	-c	Check sums against list in FILEs" \
+     "\n	-s	Don't output anything, status code shows success" \
+     "\n	-w	Warn about improperly formatted checksum lines" \
+	) \
+
+#define sha3sum_trivial_usage \
+	IF_FEATURE_MD5_SHA1_SUM_CHECK("[-c[sw]] ")"[FILE]..." \
+
+#define sha3sum_full_usage "\n\n" \
+       "Print" IF_FEATURE_MD5_SHA1_SUM_CHECK(" or check") " SHA3-512 checksums" \
 	IF_FEATURE_MD5_SHA1_SUM_CHECK( "\n" \
      "\n	-c	Check sums against list in FILEs" \
      "\n	-s	Don't output anything, status code shows success" \
@@ -1743,6 +1760,7 @@
        "TEMPLATE must end with XXXXXX (e.g. [/dir/]nameXXXXXX).\n" \
        "Without TEMPLATE, -t tmp.XXXXXX is assumed.\n" \
      "\n	-d	Make directory, not file" \
+     "\n	-q	Fail silently on errors" \
      "\n	-t	Prepend base directory name to TEMPLATE" \
      "\n	-p DIR	Use DIR as a base directory (implies -t)" \
      "\n	-u	Do not create anything; print a name" \
@@ -1760,16 +1778,16 @@
 #define pipe_progress_full_usage "" \
 
 #define run_parts_trivial_usage \
-       "[-t] "IF_FEATURE_RUN_PARTS_FANCY("[-l] ")"[-a ARG] [-u MASK] DIRECTORY" \
+       "[-t"IF_FEATURE_RUN_PARTS_FANCY("l")"] [-a ARG]... [-u MASK] DIRECTORY" \
 
 #define run_parts_full_usage "\n\n" \
        "Run a bunch of scripts in DIRECTORY\n" \
-     "\n	-t	Print what would be run, but don't actually run anything" \
-     "\n	-a ARG	Pass ARG as argument for every program" \
-     "\n	-u MASK	Set the umask to MASK before running every program" \
+     "\n	-t	Dry run" \
 	IF_FEATURE_RUN_PARTS_FANCY( \
-     "\n	-l	Print names of all matching files even if they are not executable" \
+     "\n	-l	Print names of matching files even if they are not executable" \
 	) \
+     "\n	-a ARG	Pass ARG as argument to programs" \
+     "\n	-u MASK	Set umask to MASK before running programs" \
 
 #define run_parts_example_usage \
        "$ run-parts -a start /etc/init.d\n" \
@@ -1991,7 +2009,8 @@
 #define sed_full_usage "\n\n" \
        "	-e CMD	Add CMD to sed commands to be executed" \
      "\n	-f FILE	Add FILE contents to sed commands to be executed" \
-     "\n	-i	Edit files in-place (else sends result to stdout)" \
+     "\n	-i[SFX]	Edit files in-place (otherwise sends to stdout)" \
+     "\n		Optionally back files up, appending SFX" \
      "\n	-n	Suppress automatic printing of pattern space" \
      "\n	-r	Use extended regex syntax" \
      "\n" \
@@ -2403,10 +2422,10 @@
      "\n	-S	Create a system group" \
 
 #define adduser_trivial_usage \
-       "[OPTIONS] USER" \
+       "[OPTIONS] USER [GROUP]" \
 
 #define adduser_full_usage "\n\n" \
-       "Add a user\n" \
+       "Create new user, or add USER to GROUP\n" \
      "\n	-h DIR		Home directory" \
      "\n	-g GECOS	GECOS field" \
      "\n	-s SHELL	Login shell" \
@@ -2717,11 +2736,11 @@
 
 #define dc_full_usage "\n\n" \
        "Tiny RPN calculator. Operations:\n" \
-       "+, add, -, sub, *, mul, /, div, %, mod, "IF_FEATURE_DC_LIBM("**, exp, ")"and, or, not, eor,\n" \
+       "+, add, -, sub, *, mul, /, div, %, mod, "IF_FEATURE_DC_LIBM("**, exp, ")"and, or, not, xor,\n" \
        "p - print top of the stack (without popping),\n" \
        "f - print entire stack,\n" \
        "o - pop the value and set output radix (must be 10, 16, 8 or 2).\n" \
-       "Examples: 'dc 2 2 add p' -> 4, 'dc 8 8 * 2 2 + / p' -> 16" \
+       "Examples: 'dc 2 2 add p' -> 4, 'dc 8 8 mul 2 2 + / p' -> 16" \
 
 #define dc_example_usage \
        "$ dc 2 2 + p\n" \
@@ -3049,7 +3068,7 @@
 
 #define nanddump_full_usage "\n\n" \
 	"Dump the specified MTD device\n" \
-     "\n	-o	Omit oob data" \
+     "\n	-o	Dump oob data" \
      "\n	-b	Omit bad block from the dump" \
      "\n	-s ADDR	Start address" \
      "\n	-l LEN	Length" \
@@ -3728,9 +3747,9 @@
      "\n	-r PROG		Script to run" \
      "\n	-x ARG		Extra argument for script" \
      "\n	-I		Don't exit on nonzero exit code from script" \
-     "\n	-p		Don't run script on daemon startup" \
-     "\n	-q		Don't run script on daemon quit" \
-     "\n	-l		Run script on startup even if no cable is detected" \
+     "\n	-p		Don't run \"up\" script on startup" \
+     "\n	-q		Don't run \"down\" script on exit" \
+     "\n	-l		Always run script on startup" \
      "\n	-t SECS		Poll time in seconds" \
      "\n	-u SECS		Delay before running script after link up" \
      "\n	-d SECS		Delay after link down" \
@@ -4370,8 +4389,7 @@
 	IF_FEATURE_WGET_LONG_OPTIONS( \
        "[-c|--continue] [-s|--spider] [-q|--quiet] [-O|--output-document FILE]\n" \
        "	[--header 'header: value'] [-Y|--proxy on/off] [-P DIR]\n" \
-       "	[--no-check-certificate] [-U|--user-agent AGENT]" \
-			IF_FEATURE_WGET_TIMEOUT(" [-T SEC]") " URL..." \
+       "	[-U|--user-agent AGENT]" IF_FEATURE_WGET_TIMEOUT(" [-T SEC]") " URL..." \
 	) \
 	IF_NOT_FEATURE_WGET_LONG_OPTIONS( \
        "[-csq] [-O FILE] [-Y on/off] [-P DIR] [-U AGENT]" \
@@ -4719,22 +4737,22 @@
        "Collect memory usage data in /proc and write it to stdout" \
 
 #define sysctl_trivial_usage \
-       "[OPTIONS] [VALUE]..." \
+       "[OPTIONS] [KEY[=VALUE]]..." \
 
 #define sysctl_full_usage "\n\n" \
-       "Configure kernel parameters at runtime\n" \
-     "\n	-n	Don't print key names" \
+       "Show/set kernel parameters\n" \
      "\n	-e	Don't warn about unknown keys" \
-     "\n	-w	Change sysctl setting" \
-     "\n	-p FILE	Load sysctl settings from FILE (default /etc/sysctl.conf)" \
-     "\n	-a	Display all values" \
-     "\n	-A	Display all values in table form" \
+     "\n	-n	Don't show key names" \
+     "\n	-a	Show all values" \
+     "\n	-w	Set values" \
+     "\n	-p FILE	Set values from FILE (default /etc/sysctl.conf)" \
+     "\n	-q      Set values silently" \
 
 #define sysctl_example_usage \
        "sysctl [-n] [-e] variable...\n" \
-       "sysctl [-n] [-e] -w variable=value...\n" \
+       "sysctl [-n] [-e] [-q] -w variable=value...\n" \
        "sysctl [-n] [-e] -a\n" \
-       "sysctl [-n] [-e] -p file	(default /etc/sysctl.conf)\n" \
+       "sysctl [-n] [-e] [-q] -p file	(default /etc/sysctl.conf)\n" \
        "sysctl [-n] [-e] -A\n" \
 
 #if ENABLE_FEATURE_SHOW_THREADS || ENABLE_FEATURE_TOP_SMP_CPU \
@@ -5175,6 +5193,9 @@
 	IF_FEATURE_SYSLOGD_CFG( \
      "\n	-f FILE		Use FILE as config (default:/etc/syslog.conf)" \
 	) \
+	IF_FEATURE_KMSG_SYSLOG( \
+     "\n	-K		Log to kernel printk buffer (use dmesg to read it)" \
+	) \
 
 #define syslogd_example_usage \
        "$ syslogd -R masterlog:514\n" \
@@ -5328,6 +5349,24 @@
      "\n	-s	Output superblock information" \
      "\n	-m	Show \"mode not cleared\" warnings" \
      "\n	-f	Force file system check" \
+
+#define fstrim_trivial_usage \
+       "[Options] <mountpoint>" \
+
+#define fstrim_full_usage "\n\n" \
+       "Options:" \
+	IF_LONG_OPTS( \
+     "\n	-o,--offset=offset	offset in bytes to discard from" \
+     "\n	-l,--length=length	length of bytes to discard from the offset" \
+     "\n	-m,--minimum=minimum	minimum extent length to discard" \
+     "\n	-v,--verbose		print number of discarded bytes" \
+	) \
+	IF_NOT_LONG_OPTS( \
+     "\n	-o offset	offset in bytes to discard from" \
+     "\n	-l length	length of bytes to discard from the offset" \
+     "\n	-m minimum	minimum extent length to discard" \
+     "\n	-v,		print number of discarded bytes" \
+	) \
 
 #define getopt_trivial_usage \
        "[OPTIONS] [--] OPTSTRING PARAMS" \
@@ -5522,7 +5561,9 @@
        "\n" \
        "If /dev/mdev.seq file exists, mdev will wait for its value\n" \
        "to match $SEQNUM variable. This prevents plug/unplug races.\n" \
-       "To activate this feature, create empty /dev/mdev.seq at boot." \
+       "To activate this feature, create empty /dev/mdev.seq at boot.\n" \
+       "\n" \
+       "If /dev/mdev.log file exists, debug log will be appended to it." \
 
 #define mkfs_ext2_trivial_usage \
        "[-Fn] " \
@@ -5604,6 +5645,9 @@
 	IF_FEATURE_MTAB_SUPPORT( \
      "\n	-n		Don't update /etc/mtab" \
 	) \
+	IF_FEATURE_MOUNT_VERBOSE( \
+     "\n	-v		Verbose" \
+	) \
      "\n	-r		Read-only mount" \
      "\n	-w		Read-write mount (default)" \
      "\n	-t FSTYPE[,...]	Filesystem type(s)" \
@@ -5655,9 +5699,9 @@
        "[-sp] HOST" \
 
 #define rdate_full_usage "\n\n" \
-       "Get and possibly set the system date and time from a remote HOST\n" \
-     "\n	-s	Set the system date and time (default)" \
-     "\n	-p	Print the date and time" \
+       "Get and possibly set the system date/time from a remote HOST\n" \
+     "\n	-s	Set the system date/time (default)" \
+     "\n	-p	Print the date/time" \
 
 #define rdev_trivial_usage \
        "" \

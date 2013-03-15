@@ -35,20 +35,15 @@ include $(CLEAR_VARS)
 
 # Execute make clean, make prepare and copy profiles required for normal & static lib (recovery)
 
-
-# Required to change arm-eabi- in .config, but keep the alias on arm (not arm-linux-androideabi-)
-BB_CROSS_COMPILE := $(shell basename $(TARGET_TOOLS_PREFIX))
-ifeq ($(TARGET_ARCH),arm)
-    BB_CROSS_COMPILE = arm-eabi-
-endif
-
 KERNEL_MODULES_DIR ?= /system/lib/modules
 BUSYBOX_CONFIG := minimal full
 $(BUSYBOX_CONFIG):
 	@echo -e ${CL_PFX}"prepare config for busybox $@ profile"${CL_RST}
 	@cd $(BB_PATH) && make clean
-	@sed 's/arm-eabi-/$(BB_CROSS_COMPILE)/g' $(BB_PATH)/.config-$@ > $(BB_PATH)/.config
+	@cd $(BB_PATH) && git clean -f -- ./include-$@/
+	cp $(BB_PATH)/.config-$@ $(BB_PATH)/.config
 	cd $(BB_PATH) && make prepare
+	@#cp $(BB_PATH)/.config $(BB_PATH)/.config-$@
 	@mkdir -p $(BB_PATH)/include-$@
 	cp $(BB_PATH)/include/*.h $(BB_PATH)/include-$@/
 	@rm $(BB_PATH)/include/usage_compressed.h
@@ -89,16 +84,6 @@ ifeq ($(TARGET_ARCH),mips)
 	android/libc/arch-mips/syscalls/swapon.S \
 	android/libc/arch-mips/syscalls/swapoff.S \
 	android/libc/arch-mips/syscalls/sysinfo.S
-endif
-
-ifeq ($(TARGET_ARCH),x86)
-    BUSYBOX_SRC_FILES += \
-	android/libc/arch-x86/syscalls/adjtimex.S \
-	android/libc/arch-x86/syscalls/getsid.S \
-	android/libc/arch-x86/syscalls/stime.S \
-	android/libc/arch-x86/syscalls/swapon.S \
-	android/libc/arch-x86/syscalls/swapoff.S \
-	android/libc/arch-x86/syscalls/sysinfo.S
 endif
 
 BUSYBOX_C_INCLUDES = \
@@ -213,6 +198,6 @@ LOCAL_MODULE_TAGS := optional
 LOCAL_STATIC_LIBRARIES := libclearsilverregex libc libcutils libm libuclibcrpc
 LOCAL_MODULE_CLASS := UTILITY_EXECUTABLES
 LOCAL_MODULE_PATH := $(PRODUCT_OUT)/istweak
-LOCAL_UNSTRIPPED_PATH := $(PRODUCT_OUT)/symbols/utilities
+LOCAL_UNSTRIPPED_PATH := $(PRODUCT_OUT)/symbols/istweak
 $(LOCAL_MODULE): busybox_prepare
 include $(BUILD_EXECUTABLE)
