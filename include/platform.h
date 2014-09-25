@@ -234,7 +234,11 @@ typedef uint32_t bb__aliased_uint32_t FIX_ALIASING;
 # define move_from_unaligned32(v, u32p) (memcpy(&(v), (u32p), 4))
 # define move_to_unaligned16(u16p, v) do { \
 	uint16_t __t = (v); \
+<<<<<<< HEAD
 	memcpy((u16p), &__t, sizeof(uint16_t)); \
+=======
+	memcpy((u16p), &__t, 2); \
+>>>>>>> b0e9a50e7f55f4a664751815d0f89de575c827f1
 } while (0)
 # define move_to_unaligned32(u32p, v) do { \
 	uint32_t __t = (v); \
@@ -452,7 +456,6 @@ typedef unsigned smalluint;
 #if defined(ANDROID) || defined(__ANDROID__)
 # undef HAVE_DPRINTF
 # undef HAVE_FDPRINTF
-# undef HAVE_GETLINE
 # undef HAVE_STPCPY
 # undef HAVE_STRCHRNUL
 # undef HAVE_STRVERSCMP
